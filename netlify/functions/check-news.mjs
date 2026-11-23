@@ -72,7 +72,27 @@ Return ONLY valid JSON using this exact structure:
 }
 `;
 
-  const response = await fetch(
+ const response = await fetch(
+  "https://openrouter.ai/api/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + key
+    },
+    body: JSON.stringify({
+      model: "openrouter/free",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.2,
+      response_format: {
+        type: "json_object"
+      }
+    }),
+    signal: AbortSignal.timeout(15000)
+  }
+);
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
     {
       method: "POST",
@@ -97,7 +117,7 @@ Return ONLY valid JSON using this exact structure:
 
 if (!response.ok) {
   console.error(
-    "Gemini API diagnostic:",
+    "OpenRouter API diagnostic:",
     JSON.stringify({
       status: response.status,
       statusText: response.statusText,
@@ -105,7 +125,7 @@ if (!response.ok) {
     })
   );
 
-  throw new Error("Gemini API returned status " + response.status);
+  throw new Error("OpenRouter API returned status " + response.status);
 }
 
 let result;
@@ -114,19 +134,24 @@ try {
   result = JSON.parse(responseText);
 } catch {
   console.error(
-    "Gemini API returned invalid JSON:",
+    "OpenRouter API returned invalid JSON:",
     responseText.slice(0, 1000)
   );
 
-  throw new Error("Gemini API returned an invalid response.");
+  throw new Error("OpenRouter API returned an invalid response.");
 }
-  const text = result.candidates?.[0]?.content?.parts
-    ?.map(p => p.text || "")
-    .join("");
 
-  if (!text) throw new Error("Gemini returned an empty response.");
+const messageContent = result.choices?.[0]?.message?.content;
 
-  return JSON.parse(text);
+const text = typeof messageContent === "string"
+  ? messageContent
+  : Array.isArray(messageContent)
+    ? messageContent.map(part => part.text || "").join("")
+    : "";
+
+if (!text) throw new Error("OpenRouter returned an empty response.");
+
+return JSON.parse(text);
 }
 
 export default async request => {
@@ -205,22 +230,18 @@ export default async request => {
   let aiAnalysis = null;
   let aiError = null;
 
-  const geminiKey = Netlify.env.get("GEMINI_API_KEY");
+  const openRouterKey = Netlify.env.get("OPENROUTER_API_KEY");
 
-  if (geminiKey) {
-    try {
-      aiAnalysis = await analyseClaim(
-        claim,
-        news,
-        factChecks,
-        geminiKey
-      );
-    } catch (error) {
-      console.error("AIMMS AI analysis error:", error.message);
-      aiError = "AI analysis could not be completed. Please try again.";
-    }
-  } else {
-    aiError = "Gemini API key is not configured.";
+if (openRouterKey) {
+  try {
+    aiAnalysis = await analyseClaim(claim, news, factChecks, openRouterKey);
+  } catch (error) {
+    console.error("AIMMS AI analysis error:", error.message);
+    aiError = "AI analysis could not be completed. Please try again.";
+  }
+} else {
+  aiError = "OpenRouter API key is not configured.";
+}
   }
 
   return Response.json(
