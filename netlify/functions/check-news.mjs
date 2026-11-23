@@ -109,12 +109,11 @@ Return ONLY valid JSON using this exact structure:
           responseMimeType: "application/json"
         }
       }),
-      signal: AbortSignal.timeout(15000)
-    }
-  );
+          signal: AbortSignal.timeout(15000)
+  }
+);
 
-  const responseText = await response.text();
-
+const responseText = await response.text();
 if (!response.ok) {
   console.error(
     "OpenRouter API diagnostic:",
