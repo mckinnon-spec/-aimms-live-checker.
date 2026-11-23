@@ -1,5 +1,6 @@
-const clean = (s = "") =>
-  s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+function clean(s = "") {
+  return s
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/<[^>]*>/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
@@ -8,15 +9,21 @@ const clean = (s = "") =>
     .replace(/&gt;/g, ">")
     .replace(/\s+/g, " ")
     .trim();
+}
 
 function parseRss(xml) {
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
     .slice(0, 8)
     .map(([, item]) => {
       const get = tag =>
-        clean(item.match(
-          new RegExp("<" + tag + "[^>]*>([\\s\\S]*?)</" + tag + ">", "i")
-        )?.[1] || "");
+        clean(
+          item.match(
+            new RegExp(
+              "<" + tag + "[^>]*>([\\s\\S]*?)</" + tag + ">",
+              "i"
+            )
+          )?.[1] || ""
+        );
 
       return {
         title: get("title"),
@@ -25,23 +32,25 @@ function parseRss(xml) {
         date: get("pubDate")
       };
     })
-    .filter(x => x.title && /^https?:\/\//i.test(x.url));
+    .filter(item =>
+      item.title && /^https?:\/\//i.test(item.url)
+    );
 }
 
-async function analyseClaim(claim, news, factChecks, key) {
+async function analyseClaim(claim, news, factChecks, apiKey) {
   const evidence = {
-    news: news.map(n => ({
-      title: n.title,
-      publisher: n.publisher,
-      date: n.date,
-      url: n.url
+    news: news.map(item => ({
+      title: item.title,
+      publisher: item.publisher,
+      date: item.date,
+      url: item.url
     })),
     publishedFactChecks: factChecks
   };
 
   const prompt = `
-You are the AI analysis component of AIMMS, an evidence-aware
-misinformation mitigation system.
+You are the AI analysis component of AIMMS,
+an evidence-aware misinformation mitigation system.
 
 Analyse the user's claim using ONLY the evidence supplied below.
 
@@ -52,17 +61,18 @@ AVAILABLE EVIDENCE:
 ${JSON.stringify(evidence)}
 
 IMPORTANT RULES:
-1. Do not invent facts, sources, quotations or evidence.
+
+1. Never invent facts, sources, quotations or evidence.
 2. News headlines alone cannot prove a claim true or false.
-3. A published fact-check is useful evidence, but consider its rating,
-   publisher and whether it addresses the exact claim.
+3. Consider whether published fact-checks address the exact claim.
 4. If evidence is insufficient, indirect, conflicting or unavailable,
    choose Inconclusive.
-5. Do not treat absence of evidence as evidence that a claim is false.
+5. Absence of evidence does not mean a claim is false.
 6. Explain the limitations of the available evidence.
-7. Be neutral and do not make unsupported assumptions.
+7. Remain neutral and avoid unsupported assumptions.
 
 Return ONLY valid JSON using this exact structure:
+
 {
   "verdict": "Supported, Contradicted, or Inconclusive",
   "confidence": "Low, Moderate, or High",
@@ -72,85 +82,104 @@ Return ONLY valid JSON using this exact structure:
 }
 `;
 
- const response = await fetch(
-  "https://openrouter.ai/api/v1/chat/completions",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + key
-    },
-    body: JSON.stringify({
-      model: "openrouter/free",
-      messages: [
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.2,
-      response_format: {
-        type: "json_object"
-      }
-    }),
-    signal: AbortSignal.timeout(15000)
-  }
-);
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+  const response = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": key
+        "Authorization": "Bearer " + apiKey,
+        "HTTP-Referer": "https://luxury-macaron-2eb64a.netlify.app",
+        "X-Title": "AIMMS"
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json"
+        model: "openrouter/free",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        response_format: {
+          type: "json_object"
         }
       }),
-          signal: AbortSignal.timeout(15000)
+      signal: AbortSignal.timeout(20000)
+    }
+  );
+
+  const responseText = await response.text();
+
+  if (!response.ok) {
+    console.error(
+      "OpenRouter API error:",
+      response.status,
+      responseText.slice(0, 1500)
+    );
+
+    throw new Error(
+      "OpenRouter API returned status " + response.status
+    );
   }
-);
 
-const responseText = await response.text();
-if (!response.ok) {
-  console.error(
-    "OpenRouter API diagnostic:",
-    JSON.stringify({
-      status: response.status,
-      statusText: response.statusText,
-      body: responseText.slice(0, 1500)
-    })
-  );
+  let result;
 
-  throw new Error("OpenRouter API returned status " + response.status);
-}
+  try {
+    result = JSON.parse(responseText);
+  } catch {
+    throw new Error("OpenRouter returned invalid JSON.");
+  }
 
-let result;
+  const content = result.choices?.[0]?.message?.content;
 
-try {
-  result = JSON.parse(responseText);
-} catch {
-  console.error(
-    "OpenRouter API returned invalid JSON:",
-    responseText.slice(0, 1000)
-  );
+  const aiText = typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content.map(part => part.text || "").join("")
+      : "";
 
-  throw new Error("OpenRouter API returned an invalid response.");
-}
+  if (!aiText) {
+    throw new Error("OpenRouter returned an empty response.");
+  }
 
-const messageContent = result.choices?.[0]?.message?.content;
+  let analysis;
 
-const text = typeof messageContent === "string"
-  ? messageContent
-  : Array.isArray(messageContent)
-    ? messageContent.map(part => part.text || "").join("")
-    : "";
+  try {
+    analysis = JSON.parse(aiText);
+  } catch {
+    throw new Error("AI analysis was not valid JSON.");
+  }
 
-if (!text) throw new Error("OpenRouter returned an empty response.");
+  const allowedVerdicts = [
+    "Supported",
+    "Contradicted",
+    "Inconclusive"
+  ];
 
-return JSON.parse(text);
+  const allowedConfidence = [
+    "Low",
+    "Moderate",
+    "High"
+  ];
+
+  if (!allowedVerdicts.includes(analysis.verdict)) {
+    throw new Error("AI returned an invalid verdict.");
+  }
+
+  if (!allowedConfidence.includes(analysis.confidence)) {
+    throw new Error("AI returned an invalid confidence level.");
+  }
+
+  return {
+    verdict: analysis.verdict,
+    confidence: analysis.confidence,
+    explanation: String(analysis.explanation || ""),
+    evidenceAssessment: String(
+      analysis.evidenceAssessment || ""
+    ),
+    limitations: String(analysis.limitations || "")
+  };
 }
 
 export default async request => {
@@ -162,6 +191,7 @@ export default async request => {
   }
 
   let body;
+
   try {
     body = await request.json();
   } catch {
@@ -171,77 +201,135 @@ export default async request => {
     );
   }
 
-  const claim = String(body.claim || "").trim().slice(0, 500);
+  const claim = String(body.claim || "")
+    .trim()
+    .slice(0, 500);
 
   if (claim.length < 8) {
     return Response.json(
-      { error: "Please enter a claim of at least 8 characters." },
+      {
+        error: "Please enter a claim of at least 8 characters."
+      },
       { status: 400 }
     );
   }
 
   const query = encodeURIComponent(claim);
 
+  // GOOGLE NEWS SEARCH
+
   const newsUrl =
     "https://news.google.com/rss/search?q=" +
-    query + "&hl=en-NG&gl=NG&ceid=NG:en";
+    query +
+    "&hl=en-NG&gl=NG&ceid=NG:en";
 
   const newsPromise = fetch(newsUrl, {
-    headers: { "User-Agent": "AIMMS/1.0" },
+    headers: {
+      "User-Agent": "AIMMS/1.0"
+    },
     signal: AbortSignal.timeout(10000)
   })
-    .then(async r => r.ok ? parseRss(await r.text()) : [])
-    .catch(() => []);
+    .then(async response =>
+      response.ok
+        ? parseRss(await response.text())
+        : []
+    )
+    .catch(error => {
+      console.error("News search error:", error.message);
+      return [];
+    });
 
-  const key = Netlify.env.get("GOOGLE_FACT_CHECK_API_KEY");
+  // GOOGLE FACT CHECK SEARCH
 
-  const factPromise = key
+  const factCheckKey = Netlify.env.get(
+    "GOOGLE_FACT_CHECK_API_KEY"
+  );
+
+  const factPromise = factCheckKey
     ? fetch(
         "https://factchecktools.googleapis.com/v1alpha1/claims:search?query=" +
-        query + "&languageCode=en&key=" + encodeURIComponent(key),
-        { signal: AbortSignal.timeout(10000) }
+          query +
+          "&languageCode=en&key=" +
+          encodeURIComponent(factCheckKey),
+        {
+          signal: AbortSignal.timeout(10000)
+        }
       )
-        .then(async r => {
-          if (!r.ok) return [];
+        .then(async response => {
+          if (!response.ok) return [];
 
-          const data = await r.json();
+          const data = await response.json();
 
-          return (data.claims || []).slice(0, 8).flatMap(c =>
-            (c.claimReview || [])
-              .map(v => ({
-                title: c.text || v.title || "Published fact-check",
-                url: v.url,
-                publisher: v.publisher?.name || "Fact-check publisher",
-                rating: v.textualRating || "Rating not supplied",
-                date: v.reviewDate || ""
-              }))
-              .filter(x => /^https?:\/\//i.test(x.url || ""))
-          );
+          return (data.claims || [])
+            .slice(0, 8)
+            .flatMap(claimItem =>
+              (claimItem.claimReview || [])
+                .map(review => ({
+                  title:
+                    claimItem.text ||
+                    review.title ||
+                    "Published fact-check",
+                  url: review.url,
+                  publisher:
+                    review.publisher?.name ||
+                    "Fact-check publisher",
+                  rating:
+                    review.textualRating ||
+                    "Rating not supplied",
+                  date: review.reviewDate || ""
+                }))
+                .filter(item =>
+                  /^https?:\/\//i.test(item.url || "")
+                )
+            );
         })
-        .catch(() => [])
+        .catch(error => {
+          console.error(
+            "Fact-check search error:",
+            error.message
+          );
+          return [];
+        })
     : Promise.resolve([]);
+
+  // RETRIEVE EVIDENCE
 
   const [news, factChecks] = await Promise.all([
     newsPromise,
     factPromise
   ]);
 
+  // OPENROUTER AI ANALYSIS
+
   let aiAnalysis = null;
   let aiError = null;
 
-  const openRouterKey = Netlify.env.get("OPENROUTER_API_KEY");
+  const openRouterKey = Netlify.env.get(
+    "OPENROUTER_API_KEY"
+  );
 
-if (openRouterKey) {
-  try {
-    aiAnalysis = await analyseClaim(claim, news, factChecks, openRouterKey);
-  } catch (error) {
-    console.error("AIMMS AI analysis error:", error.message);
-    aiError = "AI analysis could not be completed. Please try again.";
+  if (openRouterKey) {
+    try {
+      aiAnalysis = await analyseClaim(
+        claim,
+        news,
+        factChecks,
+        openRouterKey
+      );
+    } catch (error) {
+      console.error(
+        "AIMMS AI analysis error:",
+        error.message
+      );
+
+      aiError =
+        "AI analysis could not be completed. Please try again.";
+    }
+  } else {
+    aiError = "OpenRouter API key is not configured.";
   }
-} else {
-  aiError = "OpenRouter API key is not configured.";
-}
-  }
+
+  // RETURN RESULTS TO THE WEBSITE
 
   return Response.json(
     {
@@ -254,7 +342,9 @@ if (openRouterKey) {
         "Evidence retrieved from public sources. News coverage does not establish truth, and no matching fact-check does not mean a claim is true or false."
     },
     {
-      headers: { "Cache-Control": "no-store" }
+      headers: {
+        "Cache-Control": "no-store"
+      }
     }
   );
 };
