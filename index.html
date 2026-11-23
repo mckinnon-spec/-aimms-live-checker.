@@ -1,16 +1,605 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b35"><title>AIMMS | Misinformation Mitigation</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b35">
+<title>AIMMS | AI-Powered Misinformation Mitigation</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-:root{--ink:#14213d;--muted:#667085;--blue:#3155d9;--pale:#f3f6fc;--line:#e3e8f1;--green:#087f5b;--amber:#986500}*{box-sizing:border-box}body{margin:0;color:var(--ink);font:16px/1.65 "DM Sans",sans-serif;background:white}.wrap{max-width:1100px;margin:auto;padding:0 24px}nav{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font:800 22px Manrope}.brand span{color:var(--blue)}nav a{color:var(--ink);text-decoration:none;margin-left:22px;font-weight:600}.hero{padding:76px 0 56px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}.eyebrow{color:var(--blue);font-weight:800;letter-spacing:.13em;font-size:12px;text-transform:uppercase}h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.15}h1{font-size:clamp(40px,6vw,68px);letter-spacing:-.05em;margin:15px 0}.lead{font-size:19px;color:var(--muted);max-width:610px}.panel,.card{background:var(--pale);border:1px solid var(--line);border-radius:18px;padding:24px}.panel{box-shadow:0 20px 60px #14213d12}.panel label{font-weight:800}textarea{width:100%;min-height:130px;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin:12px 0;resize:vertical}button{border:1px solid var(--line);border-radius:9px;padding:12px 16px;background:white;color:var(--ink);font:700 14px "DM Sans";cursor:pointer}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button:disabled{opacity:.6}.actions{display:flex;gap:9px;flex-wrap:wrap}.hint{font-size:13px;color:var(--muted)}#evidence{display:none;margin-top:18px}#status{font-size:14px;color:var(--muted)}.result{padding:13px 0;border-top:1px solid var(--line)}.result a{font-weight:700;color:var(--blue)}.result small{display:block;color:var(--muted);margin-top:4px}.section{padding:54px 0;border-top:1px solid var(--line)}.section h2{font-size:32px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card h3{margin-top:0}.card p{color:var(--muted);margin-bottom:0}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{padding:18px;border:1px solid var(--line);border-radius:12px}.step b{color:var(--blue);font-size:22px}footer{padding:30px 0;background:var(--pale);color:var(--muted);font-size:13px}@media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:48px}.grid,.steps{grid-template-columns:1fr}nav{height:auto;padding:18px 0;align-items:flex-start;gap:12px;flex-direction:column}nav a{margin:0 14px 0 0}.wrap{padding:0 18px}}
-</style></head><body><div class="wrap"><nav><div class="brand">AIMMS<span>.</span></div><div><a href="#checker">Fact-check</a><a href="#method">Method</a><a href="#scope">Scope</a></div></nav>
-<main><section class="hero"><div><div class="eyebrow">AI-powered misinformation mitigation system</div><h1>Pause the post.<br>Check the evidence.</h1><p class="lead">AIMMS is an academic prototype designed to help users examine online claims by bringing together recent news coverage and published fact-check reviews.</p><p class="hint">AIMMS retrieves evidence for human review. It does not automatically determine whether every claim is true or false.</p></div>
-<div class="panel" id="checker"><label for="claim">Enter a claim, post or headline</label><textarea id="claim" placeholder="Paste the statement you want to investigate…"></textarea><div class="actions"><button class="primary" id="check">Check live evidence</button><button id="sample">Try a sample</button></div><div id="evidence" aria-live="polite"><h3>Evidence results</h3><p id="status">Searching…</p><div id="results"></div></div><p class="hint">Searches recent Google News coverage and, when configured, published Google Fact Check records.</p></div></section>
-<section class="section" id="method"><div class="eyebrow">System workflow</div><h2>How AIMMS works</h2><div class="steps"><div class="step"><b>01</b><h3>Submit</h3><p>Enter a social post, statement or news headline.</p></div><div class="step"><b>02</b><h3>Retrieve</h3><p>Search recent news and available fact-check reviews.</p></div><div class="step"><b>03</b><h3>Compare</h3><p>Inspect publisher, date, review rating and source context.</p></div><div class="step"><b>04</b><h3>Decide</h3><p>Use the evidence and original sources to make an informed judgement.</p></div></div></section>
-<section class="section"><div class="eyebrow">Why it matters</div><h2>The misinformation challenge</h2><div class="grid"><article class="card"><h3>Rapid sharing</h3><p>Online claims can spread widely before readers have time to inspect their origin or supporting evidence.</p></article><article class="card"><h3>Context matters</h3><p>Keywords alone cannot establish truth. Claims require context, credible sources and careful interpretation.</p></article><article class="card"><h3>Evidence first</h3><p>AIMMS presents related coverage and published reviews so users can inspect evidence rather than rely on a blind label.</p></article></div></section>
-<section class="section" id="scope"><div class="eyebrow">Research scope</div><h2>Prototype capabilities and limitations</h2><div class="grid"><article class="card"><h3>Available now</h3><p>Responsive interface, claim submission, recent news retrieval and display of published fact-check reviews when the API is configured.</p></article><article class="card"><h3>Not a verdict engine</h3><p>A news mention is not proof. No matching fact-check does not mean a claim is true or false. Sources must be checked individually.</p></article><article class="card"><h3>Future development</h3><p>A trained and evaluated BiLSTM model, verified Nigerian-language datasets, source credibility features and moderator review tools remain future work.</p></article></div></section></main></div><footer><div class="wrap">AIMMS · AI-Powered Misinformation Mitigation System · Academic prototype · 2026</div></footer>
+:root{
+--ink:#14213d;
+--muted:#667085;
+--blue:#3155d9;
+--pale:#f3f6fc;
+--line:#e3e8f1;
+--green:#087f5b;
+--amber:#986500;
+--red:#c0392b;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+color:var(--ink);
+font:16px/1.65 "DM Sans",sans-serif;
+background:white;
+}
+
+.wrap{max-width:1100px;margin:auto;padding:0 24px}
+
+nav{
+height:76px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+border-bottom:1px solid var(--line)
+}
+
+.brand{font:800 22px Manrope}
+.brand span{color:var(--blue)}
+
+nav a{
+color:var(--ink);
+text-decoration:none;
+margin-left:22px;
+font-weight:600
+}
+
+.hero{
+padding:76px 0 56px;
+display:grid;
+grid-template-columns:1.1fr .9fr;
+gap:40px;
+align-items:center
+}
+
+.eyebrow{
+color:var(--blue);
+font-weight:800;
+letter-spacing:.13em;
+font-size:12px;
+text-transform:uppercase
+}
+
+h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.15}
+
+h1{
+font-size:clamp(40px,6vw,68px);
+letter-spacing:-.05em;
+margin:15px 0
+}
+
+.lead{font-size:19px;color:var(--muted);max-width:610px}
+
+.panel,.card{
+background:var(--pale);
+border:1px solid var(--line);
+border-radius:18px;
+padding:24px
+}
+
+.panel{box-shadow:0 20px 60px #14213d12}
+
+.panel label{font-weight:800}
+
+textarea{
+width:100%;
+min-height:130px;
+padding:14px;
+border:1px solid #cbd5e1;
+border-radius:10px;
+font:inherit;
+margin:12px 0;
+resize:vertical
+}
+
+button{
+border:1px solid var(--line);
+border-radius:9px;
+padding:12px 16px;
+background:white;
+color:var(--ink);
+font:700 14px "DM Sans";
+cursor:pointer
+}
+
+button.primary{
+background:var(--blue);
+color:white;
+border-color:var(--blue)
+}
+
+button:disabled{opacity:.6;cursor:not-allowed}
+
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+
+.hint{font-size:13px;color:var(--muted)}
+
+#evidence{display:none;margin-top:22px}
+
+#status{font-size:14px;color:var(--muted)}
+
+.result{
+padding:13px 0;
+border-top:1px solid var(--line)
+}
+
+.result a{font-weight:700;color:var(--blue)}
+.result small{display:block;color:var(--muted);margin-top:4px}
+
+.section{padding:54px 0;border-top:1px solid var(--line)}
+.section h2{font-size:32px}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:16px
+}
+
+.card h3{margin-top:0}
+.card p{color:var(--muted);margin-bottom:0}
+
+.steps{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px
+}
+
+.step{
+padding:18px;
+border:1px solid var(--line);
+border-radius:12px
+}
+
+.step b{color:var(--blue);font-size:22px}
+
+.ai-panel{
+display:none;
+margin:22px 0;
+padding:22px;
+border:1px solid var(--line);
+border-radius:16px;
+background:white
+}
+
+.ai-heading{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+flex-wrap:wrap
+}
+
+.ai-heading h3{margin:0}
+
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+
+.badge{
+display:inline-block;
+padding:6px 12px;
+border-radius:30px;
+font-size:12px;
+font-weight:800;
+background:var(--pale)
+}
+
+.verdict{
+font:800 27px Manrope;
+margin:15px 0 5px
+}
+
+.verdict.supported{color:var(--green)}
+.verdict.contradicted{color:var(--red)}
+.verdict.inconclusive{color:var(--amber)}
+
+.ai-detail{
+padding:15px 0;
+border-top:1px solid var(--line)
+}
+
+.ai-detail h4{margin:0 0 7px;font:800 15px Manrope}
+.ai-detail p{margin:0;color:var(--muted);white-space:pre-wrap}
+
+.disclaimer{
+padding:12px;
+background:var(--pale);
+border-radius:9px;
+font-size:12px;
+color:var(--muted);
+margin-top:15px
+}
+
+.section-note{
+font-size:13px;
+color:var(--muted);
+margin-top:12px
+}
+
+footer{
+padding:30px 0;
+background:var(--pale);
+color:var(--muted);
+font-size:13px
+}
+
+@media(max-width:760px){
+.hero{grid-template-columns:1fr;padding-top:48px}
+.grid,.steps{grid-template-columns:1fr}
+nav{
+height:auto;
+padding:18px 0;
+align-items:flex-start;
+gap:12px;
+flex-direction:column
+}
+nav a{margin:0 14px 0 0}
+.wrap{padding:0 18px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<nav>
+<div class="brand">AIMMS<span>.</span></div>
+<div>
+<a href="#checker">Fact-check</a>
+<a href="#method">Method</a>
+<a href="#scope">Scope</a>
+</div>
+</nav>
+
+<main>
+
+<section class="hero">
+
+<div>
+<div class="eyebrow">AI-powered misinformation mitigation system</div>
+
+<h1>Pause the post.<br>Check the evidence.</h1>
+
+<p class="lead">
+AIMMS is an academic prototype designed to help users examine online claims through live news retrieval, published fact-check reviews and AI-powered evidence analysis.
+</p>
+
+<p class="hint">
+AIMMS uses artificial intelligence to assist evidence assessment. Its conclusions are preliminary and should not replace independent verification.
+</p>
+</div>
+
+<div class="panel" id="checker">
+
+<label for="claim">Enter a claim, post or headline</label>
+
+<textarea id="claim" placeholder="Paste the statement you want to investigate..."></textarea>
+
+<div class="actions">
+<button class="primary" id="check">Analyse claim</button>
+<button id="sample">Try a sample</button>
+</div>
+
+<div id="evidence" aria-live="polite">
+
+<h3>Evidence results</h3>
+<p id="status">Searching...</p>
+
+<div id="aiAnalysis" class="ai-panel">
+
+<div class="ai-heading">
+<h3>AI Assessment</h3>
+<div class="badges">
+<span class="badge">Gemini AI</span>
+<span class="badge" id="confidence">Confidence: --</span>
+</div>
+</div>
+
+<div id="verdict" class="verdict inconclusive">
+Inconclusive
+</div>
+
+<p class="hint">AI-generated assessment based on retrieved evidence.</p>
+
+<div class="ai-detail">
+<h4>Explanation</h4>
+<p id="explanation"></p>
+</div>
+
+<div class="ai-detail">
+<h4>Evidence Assessment</h4>
+<p id="assessment"></p>
+</div>
+
+<div class="ai-detail">
+<h4>Limitations</h4>
+<p id="limitations"></p>
+</div>
+
+<div class="disclaimer">
+Important: This is an AI-assisted preliminary assessment, not a guarantee of truth. News headlines and AI-generated conclusions are not proof. Always inspect the original sources.
+</div>
+
+</div>
+
+<div id="results"></div>
+
+</div>
+
+<p class="hint">
+Searches recent Google News coverage and published Google Fact Check records, followed by AI-assisted analysis.
+</p>
+
+</div>
+
+</section>
+
+<section class="section" id="method">
+
+<div class="eyebrow">System workflow</div>
+<h2>How AIMMS works</h2>
+
+<div class="steps">
+
+<div class="step">
+<b>01</b>
+<h3>Submit</h3>
+<p>Enter a social post, statement or news headline.</p>
+</div>
+
+<div class="step">
+<b>02</b>
+<h3>Retrieve</h3>
+<p>Search recent news and available published fact-check reviews.</p>
+</div>
+
+<div class="step">
+<b>03</b>
+<h3>Analyse</h3>
+<p>Gemini AI examines the retrieved evidence and assesses its relevance to the claim.</p>
+</div>
+
+<div class="step">
+<b>04</b>
+<h3>Review</h3>
+<p>Inspect the AI assessment and original sources before making a judgement.</p>
+</div>
+
+</div>
+</section>
+
+<section class="section">
+
+<div class="eyebrow">Why it matters</div>
+<h2>The misinformation challenge</h2>
+
+<div class="grid">
+
+<article class="card">
+<h3>Rapid sharing</h3>
+<p>Online claims can spread widely before readers have time to inspect their origin or supporting evidence.</p>
+</article>
+
+<article class="card">
+<h3>Context matters</h3>
+<p>Keywords alone cannot establish truth. Claims require context, credible sources and careful interpretation.</p>
+</article>
+
+<article class="card">
+<h3>Evidence first</h3>
+<p>AIMMS combines available public evidence with AI-assisted analysis to help users make more informed judgements.</p>
+</article>
+
+</div>
+</section>
+
+<section class="section" id="scope">
+
+<div class="eyebrow">Research scope</div>
+<h2>Prototype capabilities and limitations</h2>
+
+<div class="grid">
+
+<article class="card">
+<h3>Available capabilities</h3>
+<p>Responsive interface, claim submission, live news retrieval, published fact-check retrieval and Gemini-powered evidence assessment.</p>
+</article>
+
+<article class="card">
+<h3>Assessment limitations</h3>
+<p>AI can make mistakes. News coverage is not proof, and missing fact-check records do not establish that a claim is true or false.</p>
+</article>
+
+<article class="card">
+<h3>Future development</h3>
+<p>Model evaluation, verified Nigerian-language datasets, source credibility features, moderator review tools and further machine-learning development.</p>
+</article>
+
+</div>
+
+<p class="section-note">
+AIMMS is an academic prototype. Its performance requires systematic testing against labelled claims and independently verified evidence.
+</p>
+
+</section>
+
+</main>
+</div>
+
+<footer>
+<div class="wrap">
+AIMMS · AI-Powered Misinformation Mitigation System · Academic Prototype · 2026
+</div>
+</footer>
+
 <script>
-const $=id=>document.getElementById(id);
-$("sample").onclick=()=>{$("claim").value="The Nigerian government has announced a new nationwide public health programme starting next month.";};
-$("check").onclick=async()=>{const claim=$("claim").value.trim();if(claim.length<8){$("claim").focus();return}const box=$("evidence"),status=$("status"),results=$("results");box.style.display="block";status.textContent="Searching current sources…";results.replaceChildren();$("check").disabled=true;try{const r=await fetch("/.netlify/functions/check-news",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({claim})});const data=await r.json();if(!r.ok)throw Error(data.error||"The live evidence service is unavailable");status.textContent=data.note;for(const [heading,items,empty] of [["Published fact-checks",data.factChecks,"No matching published fact-check was found."],["Recent news coverage",data.news,"No recent matching news coverage was found."]]){const h=document.createElement("h3");h.textContent=heading;results.append(h);if(!items.length){const p=document.createElement("p");p.className="hint";p.textContent=empty;results.append(p)}for(const item of items){const d=document.createElement("div");d.className="result";const a=document.createElement("a");a.href=item.url;a.target="_blank";a.rel="noopener noreferrer";a.textContent=item.title||"Open source";const small=document.createElement("small");small.textContent=[item.publisher,item.rating,item.date].filter(Boolean).join(" · ");d.append(a,small);results.append(d)}}}catch(e){status.textContent="Live check unavailable: "+e.message+". Please try again later."}finally{$("check").disabled=false}};
-</script></body></html>
+
+const $ = id => document.getElementById(id);
+
+$("sample").onclick = () => {
+$("claim").value =
+"The Nigerian government has announced a new nationwide public health programme starting next month.";
+};
+
+function showAI(data){
+
+const ai = data.aiAnalysis;
+
+if(!ai){
+$("aiAnalysis").style.display = "none";
+return;
+}
+
+$("aiAnalysis").style.display = "block";
+
+const verdict = String(ai.verdict || "Inconclusive");
+
+$("verdict").textContent = verdict;
+
+$("verdict").className = "verdict " +
+(verdict.toLowerCase() === "supported" ? "supported" :
+verdict.toLowerCase() === "contradicted" ? "contradicted" :
+"inconclusive");
+
+$("confidence").textContent =
+"Confidence: " + (ai.confidence || "Not specified");
+
+$("explanation").textContent =
+ai.explanation || "No explanation was provided.";
+
+$("assessment").textContent =
+ai.evidenceAssessment || "No evidence assessment was provided.";
+
+$("limitations").textContent =
+ai.limitations || "No limitations were provided.";
+
+}
+
+function showSources(heading,items,empty){
+
+const results = $("results");
+
+const h = document.createElement("h3");
+h.textContent = heading;
+results.append(h);
+
+if(!items || !items.length){
+const p = document.createElement("p");
+p.className = "hint";
+p.textContent = empty;
+results.append(p);
+return;
+}
+
+for(const item of items){
+
+const d = document.createElement("div");
+d.className = "result";
+
+const a = document.createElement("a");
+a.href = item.url;
+a.target = "_blank";
+a.rel = "noopener noreferrer";
+a.textContent = item.title || "Open source";
+
+const small = document.createElement("small");
+
+small.textContent = [
+item.publisher,
+item.rating,
+item.date
+].filter(Boolean).join(" · ");
+
+d.append(a,small);
+results.append(d);
+
+}
+
+}
+
+$("check").onclick = async () => {
+
+const claim = $("claim").value.trim();
+
+if(claim.length < 8){
+$("claim").focus();
+return;
+}
+
+const box = $("evidence");
+const status = $("status");
+const results = $("results");
+
+box.style.display = "block";
+status.textContent = "Retrieving evidence and analysing your claim...";
+results.replaceChildren();
+
+$("aiAnalysis").style.display = "none";
+$("check").disabled = true;
+
+try{
+
+const response = await fetch(
+"/.netlify/functions/check-news",
+{
+method:"POST",
+headers:{
+"content-type":"application/json"
+},
+body:JSON.stringify({claim})
+}
+);
+
+const data = await response.json();
+
+if(!response.ok){
+throw new Error(data.error || "The evidence service is unavailable.");
+}
+
+status.textContent = data.note ||
+"Evidence retrieval completed.";
+
+showAI(data);
+
+if(data.aiError){
+const error = document.createElement("p");
+error.className = "hint";
+error.textContent = "AI analysis unavailable: " + data.aiError;
+results.append(error);
+}
+
+showSources(
+"Published fact-checks",
+data.factChecks,
+"No matching published fact-check was found."
+);
+
+showSources(
+"Recent news coverage",
+data.news,
+"No recent matching news coverage was found."
+);
+
+}catch(error){
+
+status.textContent =
+"Live check unavailable: " + error.message +
+". Please try again later.";
+
+}finally{
+
+$("check").disabled = false;
+
+}
+
+};
+
+</script>
+
+</body>
+</html>
