@@ -93,11 +93,33 @@ Return ONLY valid JSON using this exact structure:
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Gemini API returned status " + response.status);
-  }
+  const responseText = await response.text();
 
-  const result = await response.json();
+if (!response.ok) {
+  console.error(
+    "Gemini API diagnostic:",
+    JSON.stringify({
+      status: response.status,
+      statusText: response.statusText,
+      body: responseText.slice(0, 1500)
+    })
+  );
+
+  throw new Error("Gemini API returned status " + response.status);
+}
+
+let result;
+
+try {
+  result = JSON.parse(responseText);
+} catch {
+  console.error(
+    "Gemini API returned invalid JSON:",
+    responseText.slice(0, 1000)
+  );
+
+  throw new Error("Gemini API returned an invalid response.");
+}
   const text = result.candidates?.[0]?.content?.parts
     ?.map(p => p.text || "")
     .join("");
