@@ -89,7 +89,7 @@ Return ONLY valid JSON using this exact structure:
           responseMimeType: "application/json"
         }
       }),
-      signal: AbortSignal.timeout(30000)
+      signal: AbortSignal.timeout(15000)
     }
   );
 
